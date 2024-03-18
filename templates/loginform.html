@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Login</h1>
+<h1>Login and registration</h1>
 <form action="" method="post">
     <p>
         {{ form.nickname.label }}<br>
-        {{ form.nickname(class="form-control", type="text") }}<br>
+        {{ form.nickname(type="text") }}<br>
         {% for error in form.nickname.errors %}
             <div class="allert alert-danger" role="alert">
                 {{ error }}
@@ -14,7 +14,7 @@
     </p>
     <p>
         {{ form.password.label }}<br>
-        {{ form.password(class="form-control", type="password") }}<br>
+        {{ form.password(type="password") }}<br>
         {% for error in form.password.errors %}
             <div class="allert alert-danger" role="alert">
                 {{ error }}

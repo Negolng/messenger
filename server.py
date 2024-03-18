@@ -1,4 +1,4 @@
-from main import main
+from routes import main
 
 
 if __name__ == '__main__':
