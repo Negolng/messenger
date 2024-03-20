@@ -3,8 +3,8 @@ from secrets import randbits
 from data import db_session
 from login import LoginForm, login_required
 from data.users import User
-from database_functions import hash_password, registrate, validate_chatname
-from forms import ChatForm
+from database_functions import hash_password, registrate, validate_chatname, validate_password
+from forms import ChatForm, ChangePasswordForm
 
 
 app = Flask(__name__)
@@ -64,12 +64,36 @@ def profile():
     return render_template('profile.html', session=session)
 
 
+@app.route('/profile/change_password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    form = ChangePasswordForm()
+
+    if form.is_submitted():
+        old_password = form.old_password.data
+        new_password = form.new_password.data
+        if validate_password(new_password):
+            dbs = db_session.create_session()
+            username = session['Username']
+            oldps: User = dbs.query(User).filter(User.name == username)[0]
+            if oldps.password == hash_password(old_password):
+                oldps.password = hash_password(new_password)
+                dbs.commit()
+                return redirect('/')
+            return render_template('change_password.html', form=form,
+                                   message='Wrong password')
+        return render_template('change_password.html', form=form,
+                               message='Invalid new password')
+
+    return render_template('change_password.html', form=form)
+
+
 @app.route('/profile/create_chat', methods=['GET', 'POST'])
 @login_required
 def create_chat():
     form = ChatForm()
     if form.is_submitted():
-        if validate_chatname(form.name.data):
+        if not validate_chatname(form.name.data):
             return render_template('create_chat.html', form=form, message="Invalid chat name")
         
         return render_template('create_chat.html', form=form, message="Chat hasn't been created")
