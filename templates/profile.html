@@ -3,6 +3,6 @@
 {% block content %}
 <h1>Your profile data: </h1>
 <br>
-Nickname: {{ session["Username"] }}<br>
-Your IP address: {{ session["IP"] }}<br>
+<p>Your nickname: {{ session["Username"] }}</p>
+<a href="/profile/create_chat">Create chat</a>
 {% endblock %}

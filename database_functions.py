@@ -37,3 +37,8 @@ def validate_password(password: str) -> bool:
 def validate_username(username: str) -> bool:
     return (all([letter in ascii_letters + digits + punctuation for letter in username])
             and 1 < len(username) < 64)
+
+
+def validate_chatname(username: str) -> bool:
+    return (all([letter in ascii_letters + digits + punctuation for letter in username])
+            and 1 < len(username) < 64)

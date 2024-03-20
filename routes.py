@@ -1,9 +1,10 @@
-from flask import Flask, render_template, redirect, session, request, make_response
+from flask import Flask, render_template, redirect, session, request
 from secrets import randbits
 from data import db_session
 from login import LoginForm, login_required
 from data.users import User
-from database_functions import hash_password, registrate
+from database_functions import hash_password, registrate, validate_chatname
+from forms import ChatForm
 
 
 app = Flask(__name__)
@@ -44,23 +45,35 @@ def login():
             if db_user[0].password == hash_password(password):
                 session['logged_in'] = True
                 session['Username'] = username
-                return redirect('/')
+                return redirect('/profile')
             else:
                 return render_template('loginform.html', form=form, message='Incorrect password')
         result = registrate(username, password)
         if result:
             session['logged_in'] = True
             session['Username'] = username
-            return redirect('/')
+            return redirect('/profile')
         else:
             return render_template('loginform.html', form=form, message='Invalid password or username')
     return render_template('loginform.html', form=form, message='')
 
 
-@app.route('/info')
+@app.route('/profile')
 @login_required
 def profile():
     return render_template('profile.html', session=session)
+
+
+@app.route('/profile/create_chat', methods=['GET', 'POST'])
+@login_required
+def create_chat():
+    form = ChatForm()
+    if form.is_submitted():
+        if validate_chatname(form.name.data):
+            return render_template('create_chat.html', form=form, message="Invalid chat name")
+        
+        return render_template('create_chat.html', form=form, message="Chat hasn't been created")
+    return render_template('create_chat.html', form=form, message='')
 
 
 def main():
