@@ -5,7 +5,7 @@ from login import LoginForm, login_required
 from data.users import User
 from data.messages import Message
 from database_functions import *
-from forms import ChatForm, ChangePasswordForm
+from forms import ChatForm, ChangePasswordForm, DeleteAccountForm
 
 
 app = Flask(__name__)
@@ -42,10 +42,12 @@ def login():
         print(username, password)
         dbs = db_session.create_session()
         db_user = dbs.query(User).filter(User.name == username)
+        dbs.close()
         if list(db_user):
             if db_user[0].password == hash_password(password):
                 session['logged_in'] = True
                 session['Username'] = username
+
                 return redirect('/profile')
             else:
                 return render_template('loginform.html', form=form, message='Incorrect password')
@@ -81,6 +83,7 @@ def change_password():
             if oldps.password == hash_password(old_password):
                 oldps.password = hash_password(new_password)
                 dbs.commit()
+                dbs.close()
                 return redirect('/')
             return render_template('change_password.html', form=form,
                                    message='Wrong password')
@@ -88,6 +91,26 @@ def change_password():
                                message='Invalid new password')
 
     return render_template('change_password.html', form=form)
+
+
+@app.route('/profile/delete', methods=['GET', 'POST'])
+@login_required
+def delete_account():
+    form = DeleteAccountForm()
+    if form.is_submitted():
+        passw = form.password.data
+        dbs = db_session.create_session()
+        username: str = session['Username']
+        user: User = dbs.query(User).filter(User.name == username)[0]
+        if user.password == hash_password(passw):
+            dbs.close()
+            delete_acc(user)
+            session['logged_in'] = False
+            session['Username'] = None
+            return redirect('/')
+        else:
+            render_template("delete_account.html", form=form, message='Incorrect password!')
+    return render_template("delete_account.html", form=form, message='')
 
 
 @app.route('/profile/create_chat', methods=['GET', 'POST'])
@@ -101,7 +124,7 @@ def create_chat():
         chat_id = add_chat(session['Username'], form.name.data)
         other_users = parse_users(form.users.data)
         if other_users:
-            error, message = add_users(other_users, chat_id)
+            error, message = add_users(other_users, chat_id, session['Username'])
             if error:
                 return render_template('create_chat.html', form=form, message=message)
         return redirect('/profile')

@@ -12,6 +12,8 @@
 <br><br>
 <h4>Your chats:</h4>
 {% for chat in chats %}
-    <a href="/chats/{{ chat.id }}">{{ chat.name }}</a>
+    <a href="/chats/{{ chat.id }}">{{ chat.name }}</a><br>
 {% endfor %}
+<br><br><br>
+<a href="/profile/delete">Delete account</a>
 {% endblock %}

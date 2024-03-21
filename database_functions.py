@@ -66,12 +66,16 @@ def add_chat(username: str, chatname: str) -> int:
     dbs.add(user_chat)
 
     dbs.commit()
-    return chtid.id
+    idd = chtid.id
+    dbs.close()
+    return idd
 
 
-def add_users(users: list[str], chat_id: int):
+def add_users(users: list[str], chat_id: int, owner: str):
     dbs = db_session.create_session()
     for user in users:
+        if user == owner:
+            continue
         userid = dbs.query(User).filter(User.name == user)
         if not list(userid):
             dbs.close()
@@ -79,12 +83,14 @@ def add_users(users: list[str], chat_id: int):
             dbs.delete(dbs.query(Chat).filter(Chat.id == chat_id)[0])
             dbs.delete(dbs.query(UserChat).filter(UserChat.chat_id == chat_id)[0])
             dbs.commit()
+            dbs.close()
             return True, f'User with name {user} is not found'
         user_chat = UserChat()
         user_chat.user_id = userid[0].id
         user_chat.chat_id = chat_id
         dbs.add(user_chat)
     dbs.commit()
+    dbs.close()
     return False, ''
 
 
@@ -114,3 +120,15 @@ def find_users(chat_id: int):
         # TODO: Когда пользователь удаляет аккаунт, также удалить  его из всех чатов, иначе программа сломается
         all_users_with_access.append(dbs.query(User).filter(User.id == userid)[0])
     return all_users_with_access
+
+
+def delete_acc(user: User):
+    dbs = db_session.create_session()
+    user_id: int = user.id
+    # delete dependencies between the user and chats
+    all_chats = dbs.query(UserChat).filter(UserChat.user_id == user_id)
+    for chat in all_chats:
+        dbs.delete(chat)
+    dbs.delete(user)
+    dbs.commit()
+    dbs.close()
