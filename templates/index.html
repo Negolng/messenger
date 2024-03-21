@@ -2,8 +2,20 @@
 
 {% block content %}
 <h1>This is a beta version of my website!</h1>
+{% if session["logged_in"] == true %}
+
+<p>You have been logged in already as {{ session["Username"] }}!</p>
+<br>
 <p>Here are some links: </p>
+
+{% else %}
+<p>Here are some links: </p>
+
 <p><a href="/reglogin">registration and logging in</a></p>
+
+{% endif %}
+
+
 <p><a href="/logout">log out</a></p>
 <p><a href="/profile">your profile</a></p>
 <p><a href="/">this page</a> (I don't know why you could possibly need it)</p>

@@ -3,7 +3,8 @@ from secrets import randbits
 from data import db_session
 from login import LoginForm, login_required
 from data.users import User
-from database_functions import hash_password, registrate, validate_chatname, validate_password
+from data.messages import Message
+from database_functions import *
 from forms import ChatForm, ChangePasswordForm
 
 
@@ -22,7 +23,7 @@ def before():
 @app.route('/')
 @app.route('/index')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', session=session)
 
 
 @app.route('/logout')
@@ -36,7 +37,7 @@ def logout():
 def login():
     form = LoginForm()
     if form.is_submitted():
-        username = form.nickname.data
+        username: str = form.nickname.data
         password = form.password.data
         print(username, password)
         dbs = db_session.create_session()
@@ -61,7 +62,8 @@ def login():
 @app.route('/profile')
 @login_required
 def profile():
-    return render_template('profile.html', session=session)
+    chats = find_chats(session['Username'])
+    return render_template('profile.html', session=session, chats=chats)
 
 
 @app.route('/profile/change_password', methods=['GET', 'POST'])
@@ -74,7 +76,7 @@ def change_password():
         new_password = form.new_password.data
         if validate_password(new_password):
             dbs = db_session.create_session()
-            username = session['Username']
+            username: str = session['Username']
             oldps: User = dbs.query(User).filter(User.name == username)[0]
             if oldps.password == hash_password(old_password):
                 oldps.password = hash_password(new_password)
@@ -95,15 +97,36 @@ def create_chat():
     if form.is_submitted():
         if not validate_chatname(form.name.data):
             return render_template('create_chat.html', form=form, message="Invalid chat name")
-        
-        return render_template('create_chat.html', form=form, message="Chat hasn't been created")
+
+        chat_id = add_chat(session['Username'], form.name.data)
+        other_users = parse_users(form.users.data)
+        if other_users:
+            error, message = add_users(other_users, chat_id)
+            if error:
+                return render_template('create_chat.html', form=form, message=message)
+        return redirect('/profile')
     return render_template('create_chat.html', form=form, message='')
 
 
+@app.route('/chats/<int:chat_id>')
+@login_required
+def chat(chat_id):
+    members: list[User] = find_users(chat_id)
+    if members == -1:
+        return "<p>Chat with such id doesn't exist</p>"
+    all_names = [member.name for member in members]
+    if session['Username'] not in all_names:
+        return "<p>You don't have access to this chat</p>"
+    return f'''
+    
+    <p>This is a chat with id: {chat_id}</p>
+    <p>The members of this chat are: {', '.join(all_names)}</p>
+    <h1>Work in progress!</h1>
+    '''
+
+
 def main():
-    db_session.global_init("db/Users.db")
-    # add_user('Negolng', 'PipaVPope')
-    # add_user('popa', 'pipa')
+    db_session.global_init("db/database.db")
     app.run()
 
 
