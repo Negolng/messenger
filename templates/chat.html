@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Chat "{{ chatname }}"</h1>
+<br>
+<p>All users with access to the chat {{ members }}</p>
+<br>
+
+<h6>Messages: </h6>
+<div class="scroller" id="dynamic-content">
+    {% for message in messages %}
+    <p>{{ message.author }}: {{ message.content }}</p>
+    {% endfor %}
+</div>
+
+<br>
+
+
+<form action="" method="post">
+    <p>{{ form.message_field() }}  {{ form.send() }}</p>
+</form>
+
+
+<a href="/profile">Back to all chats</a>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function updateDynamicContent() {
+        console.log({{ chat_id}})
+        console.log({{ token }})
+        $.ajax({
+            url: '/api/get_messages/' + {{ chat_id }} + '/' + {{ token }},
+            method: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                let a = data.messages;
+                let div = document.getElementById('dynamic-content');
+                var index;
+                div.innerHTML = "";
+                for (index = 0; index < a.length; index++) {
+                    console.log(a[index].author);
+                    console.log(a[index].content);
+                    div.innerHTML = div.innerHTML + a[index].author + ': ' + a[index].message_content + '\n';
+
+                }
+                // $('#dynamic-content').text();
+            },
+            error: function() {
+                console.error('Error fetching data.');
+            }
+        });
+    }
+        updateDynamicContent();
+    setInterval(updateDynamicContent, 1000);
+    </script>
+{% endblock %}

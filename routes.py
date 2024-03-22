@@ -1,15 +1,17 @@
-from flask import Flask, render_template, redirect, session, request
+from flask import Flask, render_template, redirect, session, request, jsonify
 from secrets import randbits
 from data import db_session
 from login import LoginForm, login_required
 from data.users import User
 from data.messages import Message
 from database_functions import *
-from forms import ChatForm, ChangePasswordForm, DeleteAccountForm
-
+from forms import ChatForm, ChangePasswordForm, DeleteAccountForm, MessageForm
+import datetime as dt
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = str(randbits(128))
+
+gl_token = int(randbits(32))
 
 
 @app.before_request
@@ -39,7 +41,6 @@ def login():
     if form.is_submitted():
         username: str = form.nickname.data
         password = form.password.data
-        print(username, password)
         dbs = db_session.create_session()
         db_user = dbs.query(User).filter(User.name == username)
         dbs.close()
@@ -131,25 +132,54 @@ def create_chat():
     return render_template('create_chat.html', form=form, message='')
 
 
-@app.route('/chats/<int:chat_id>')
+@app.route('/chats/<int:chat_id>', methods=["GET", 'POST'])
 @login_required
 def chat(chat_id):
     members: list[User] = find_users(chat_id)
+
     if members == -1:
         return "<p>Chat with such id doesn't exist</p>"
+
+    # check if this chat exists
+    chatname = get_chat_name(chat_id)
     all_names = [member.name for member in members]
+
     if session['Username'] not in all_names:
         return "<p>You don't have access to this chat</p>"
-    return f'''
-    
-    <p>This is a chat with id: {chat_id}</p>
-    <p>The members of this chat are: {', '.join(all_names)}</p>
-    <h1>Work in progress!</h1>
-    '''
+
+    form = MessageForm()
+    messages = get_messages(chat_id)
+    if form.is_submitted():
+        if form.message_field.data:
+            moment = dt.datetime.now()
+            add_message(session['Username'], MyTime(int(moment.year), int(moment.day), int(moment.hour),
+                                                    int(moment.minute)), form.message_field.data, chat_id)
+            return redirect(f'/chats/{chat_id}')
+    return render_template('chat.html', form=form, chatname=chatname, messages=messages, members=', '.join(all_names),
+                           chat_id=chat_id, token=gl_token)
+
+
+@app.route('/api/get_messages/<int:chat_id>/<int:token>')
+def get_messages_t(chat_id, token):
+    if token == token:
+        respns = {'messages': []}
+        messages = get_messages(chat_id)
+        for message in messages:
+            respns['messages'].append({'author': message.author,
+                                       'time': {'years': message.time.year,
+                                                'days': message.time.day,
+                                                'hours': message.time.hour,
+                                                'minutes': message.time.minute},
+                                       'message_content': message.content})
+        return jsonify(respns)
+
+    else:
+        return 'Sorry, but you cannot access this page without a token'
 
 
 def main():
     db_session.global_init("db/database.db")
+    moment = dt.datetime.now()
     app.run()
 
 

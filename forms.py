@@ -16,8 +16,8 @@ class ChangePasswordForm(FlaskForm):
 
 
 class MessageForm(FlaskForm):
-    message = StringField("Your message", validators=[DataRequired()])
-    submit = SubmitField("Send")
+    message_field = StringField("Your message", validators=[DataRequired()])
+    send = SubmitField("Send")
 
 
 class DeleteAccountForm(FlaskForm):

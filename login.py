@@ -14,10 +14,10 @@ class LoginForm(FlaskForm):
 
 
 def login_required(function):
-    def _fuck(*args, **kwargs):
+    def _wrapper(*args, **kwargs):
         if session['logged_in']:
             return function(*args, **kwargs)
         return render_template('no_login.html')
 
-    _fuck.__name__ = function.__name__
-    return _fuck
+    _wrapper.__name__ = function.__name__
+    return _wrapper
