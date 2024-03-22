@@ -23,3 +23,7 @@ class MessageForm(FlaskForm):
 class DeleteAccountForm(FlaskForm):
     password = StringField('Enter your password before deleting the account', validators=[DataRequired()])
     submit = SubmitField("Delete my account")
+
+
+class DeleteChatForm(FlaskForm):
+    delete = SubmitField("Delete the chat")

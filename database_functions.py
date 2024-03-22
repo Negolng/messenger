@@ -208,3 +208,29 @@ def add_message(author: str, time: MyTime, message: str, chat: int):
     dbs.commit()
     dbs.close()
     return True, ''
+
+
+def delete_chat(chat_id: int):
+    dbs = db_session.create_session()
+    try:
+
+        # find the chat
+        chat = dbs.query(Chat).filter(Chat.id == chat_id)
+        if not list(chat):
+            return  # if it doesn't exist
+
+        # delete all messages in the chat
+        messages = dbs.query(Message).filter(Message.chat == chat_id)
+        for message in messages:
+            dbs.delete(message)
+
+        # delete all relationships
+        chat_users = dbs.query(UserChat).filter(UserChat.chat_id == chat_id)
+        for chat_user in chat_users:
+            dbs.delete(chat_user)
+
+        dbs.delete(chat)
+
+        dbs.commit()
+    finally:
+        dbs.close()

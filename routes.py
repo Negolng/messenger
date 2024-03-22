@@ -5,7 +5,7 @@ from login import LoginForm, login_required
 from data.users import User
 from data.messages import Message
 from database_functions import *
-from forms import ChatForm, ChangePasswordForm, DeleteAccountForm, MessageForm
+from forms import *
 import datetime as dt
 
 app = Flask(__name__)
@@ -159,6 +159,29 @@ def chat(chat_id):
                            chat_id=chat_id, token=gl_token)
 
 
+@app.route('/chat/<int:chat_id>/delete', methods=['GET', 'POST'])
+@login_required
+def pipa(chat_id):
+
+    members: list[User] = find_users(chat_id)
+
+    if members == -1:
+        return "<p>Chat with such id doesn't exist</p>"
+    chatname = get_chat_name(chat_id)
+
+    # check if this chat exists
+    all_names = [member.name for member in members]
+
+    if session['Username'] not in all_names:
+        return "<p>You don't have access to this chat</p>"
+
+    form = DeleteChatForm()
+    if form.is_submitted():
+        delete_chat(chat_id)
+        return redirect('/profile')
+    return render_template('delete_chat.html', form=form, chatname=chatname)
+
+
 @app.route('/api/get_messages/<int:chat_id>/<int:token>')
 def get_messages_t(chat_id, token):
     if token == token:
@@ -179,7 +202,6 @@ def get_messages_t(chat_id, token):
 
 def main():
     db_session.global_init("db/database.db")
-    moment = dt.datetime.now()
     app.run()
 
 

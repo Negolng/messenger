@@ -17,17 +17,17 @@
 
 
 <form action="" method="post">
-    <p>{{ form.message_field() }}  {{ form.send() }}</p>
+    <p>{{ form.message_field(id="pipa") }}  {{ form.send() }}</p>
 </form>
 
 
 <a href="/profile">Back to all chats</a>
+<br><br><br>
+<a href="/chat/{{ chat_id }}/delete">Delete this chat</a>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         function updateDynamicContent() {
-        console.log({{ chat_id}})
-        console.log({{ token }})
         $.ajax({
             url: '/api/get_messages/' + {{ chat_id }} + '/' + {{ token }},
             method: 'GET',
@@ -51,6 +51,6 @@
         });
     }
         updateDynamicContent();
-    setInterval(updateDynamicContent, 1000);
+    setInterval(updateDynamicContent, 500);
     </script>
 {% endblock %}
