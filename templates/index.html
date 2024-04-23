@@ -1,27 +1,29 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>This is a beta version of my website!</h1>
-{% if session["logged_in"] == true %}
+    <div class="position-absolute top-50 start-50 translate-middle bg-white text-black">
+        <h1>Messenger 1.0 </h1>
+        {% if session["logged_in"] == true %}
 
-<p>You have been logged in already as {{ session["Username"] }}!</p>
-<br>
-<p>Here are some links: </p>
+        <p>You have been logged in already as {{ session["Username"] }}!</p>
+        <br>
+        <p>Here are some links: </p>
+        <p><a href="/logout" class="btn btn-info" role="button">log out</a></p>
 
-{% else %}
-<p>Here are some links: </p>
+        {% else %}
+        <p>Here are some links: </p>
 
-<p><a href="/reglogin">registration and logging in</a></p>
+        <p><a href="/reglogin" class="btn btn-info" role="button">registration and logging in</a></p>
 
-{% endif %}
+        {% endif %}
 
 
-<p><a href="/logout">log out</a></p>
-<p><a href="/profile">your profile</a></p>
-<p><a href="/">this page</a> (I don't know why you could possibly need it)</p>
 
+        <p><a href="/profile" class="btn btn-info" role="button">your profile</a></p>
+        <p><a href="/" class="btn btn-info" role="button">refresh the page</a></p>
+
+    </div>
+{% endblock %}
 <br><br><br><br>
 <p>By the way, the website won't work without this gif</p>
 <div class="tenor-gif-embed" data-postid="18099355" data-share-method="host" data-aspect-ratio="1.35593" data-width="25%"><a href="https://tenor.com/view/eminem-gif-18099355">Eminem GIF</a>from <a href="https://tenor.com/search/eminem-gifs">Eminem GIFs</a></div> <script type="text/javascript" async src="https://tenor.com/embed.js"></script>
-{% endblock %}
-

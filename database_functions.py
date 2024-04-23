@@ -229,7 +229,7 @@ def delete_chat(chat_id: int):
         for chat_user in chat_users:
             dbs.delete(chat_user)
 
-        dbs.delete(chat)
+        dbs.delete(chat[0])
 
         dbs.commit()
     finally:

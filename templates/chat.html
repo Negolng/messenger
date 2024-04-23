@@ -3,16 +3,21 @@
 {% block content %}
 <h1>Chat "{{ chatname }}"</h1>
 <br>
-<p>All users with access to the chat {{ members }}</p>
+<p>All users with access to the chat: {{ members }}</p>
 <br>
 
 <h6>Messages: </h6>
+{% if messages %}
 <div class="scroller" id="dynamic-content">
     {% for message in messages %}
     <p>{{ message.author }}: {{ message.content }}</p>
     {% endfor %}
 </div>
+{% else %}
 
+<p><b>There are no messages yet </b></p>
+
+{% endif %}
 <br>
 
 
@@ -21,9 +26,8 @@
 </form>
 
 
-<a href="/profile">Back to all chats</a>
-<br><br><br>
-<a href="/chat/{{ chat_id }}/delete">Delete this chat</a>
+<a href="/profile" class="btn btn-info" role="button">Back to all chats</a>
+<a href="/chats/{{ chat_id }}/delete" class="btn btn-danger" role="button">Delete this chat</a>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>

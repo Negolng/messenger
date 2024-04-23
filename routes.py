@@ -1,9 +1,6 @@
 from flask import Flask, render_template, redirect, session, request, jsonify
 from secrets import randbits
-from data import db_session
 from login import LoginForm, login_required
-from data.users import User
-from data.messages import Message
 from database_functions import *
 from forms import *
 import datetime as dt
@@ -159,9 +156,9 @@ def chat(chat_id):
                            chat_id=chat_id, token=gl_token)
 
 
-@app.route('/chat/<int:chat_id>/delete', methods=['GET', 'POST'])
+@app.route('/chats/<int:chat_id>/delete', methods=['GET', 'POST'])
 @login_required
-def pipa(chat_id):
+def delete_chat_route(chat_id):
 
     members: list[User] = find_users(chat_id)
 
@@ -201,8 +198,10 @@ def get_messages_t(chat_id, token):
 
 
 def main():
+    from waitress import serve
     db_session.global_init("db/database.db")
-    app.run()
+    serve(app, host="127.0.0.1", port=8080)
+    # app.run(port=8080)
 
 
 if __name__ == '__main__':
