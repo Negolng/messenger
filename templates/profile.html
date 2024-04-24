@@ -2,7 +2,7 @@
 
 {% block content %}
 <h1>Your profile data: </h1>
-<img src="api/pictures/{{ session['Username'] + '.jpg'}}" alt="You don't have a profile picture">
+<!-- <img src="api/pictures/{{ session['Username'] + '.jpg'}}" alt="You don't have a profile picture"> -->
 <br>
 <p>Your nickname: {{ session["Username"] }}</p>
 <a href="/profile/create_chat" class="btn btn-outline-info" role="button">Create chat</a>
@@ -19,11 +19,13 @@
     <br><br><br>
 {% else %}
     <p><b>You don't have any chats yet </b></p>
+<!--
 <h2>Upload Image</h2>
 <form action="/upload_image" method="post" enctype="multipart/form-data">
     <input type="file" name="image" accept="image/*">
     <input type="submit" value="Upload">
 </form>
+-->
 {% endif %}
 <a href="/profile/delete" class="btn btn-outline-danger" role="button">Delete account</a>
 {% endblock %}
