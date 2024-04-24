@@ -1,12 +1,14 @@
-from flask import Flask, render_template, redirect, session, request, jsonify
+from flask import Flask, render_template, redirect, session, request, jsonify, send_from_directory
 from secrets import randbits
 from login import LoginForm, login_required
 from database_functions import *
 from forms import *
 import datetime as dt
+import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = str(randbits(128))
+app.config['UPLOAD_FOLDER'] = 'pictures'
 
 gl_token = int(randbits(32))
 
@@ -197,11 +199,29 @@ def get_messages_t(chat_id, token):
         return 'Sorry, but you cannot access this page without a token'
 
 
+@app.route('/upload_image', methods=['POST'])
+@login_required
+def upload_image():
+    if 'image' not in request.files:
+        return 'No image selected for upload'
+    file = request.files['image']
+    if file.filename == '':
+        return 'No image selected for upload'
+    file.save(str(os.path.join(app.config['UPLOAD_FOLDER'], session['Username'] + '.jpg')))
+    return 'Image successfully uploaded'
+
+
+@app.route('/api/pictures/<filename>')
+@login_required
+def get_image(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+
 def main():
     from waitress import serve
     db_session.global_init("db/database.db")
-    serve(app, host="127.0.0.1", port=8080)
-    # app.run(port=8080)
+    # serve(app, host="127.0.0.1", port=8080)
+    app.run(port=8080)
 
 
 if __name__ == '__main__':
