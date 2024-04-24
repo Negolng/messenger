@@ -220,8 +220,8 @@ def get_image(filename):
 def main():
     from waitress import serve
     db_session.global_init("db/database.db")
-    # serve(app, host="127.0.0.1", port=8080)
-    app.run(port=8080)
+    serve(app, host="127.0.0.1", port=8080)
+    # app.run(port=8080)
 
 
 if __name__ == '__main__':
